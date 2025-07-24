@@ -10,7 +10,9 @@ void printBoard(char board[9][9], char uneditable[9][9])
 			if (uneditable[y][x]) attron(A_REVERSE);
 			mvprintw(y<<1, x<<1, "%c", board[y][x]);
 			if (uneditable[y][x]) attroff(A_REVERSE);
+			if (x%3==2) printw("|");
 		}
+		if (y%3==2) mvprintw((y<<1)+1, 0, "-----+-----+-----+");
 	}
 }
 
@@ -93,7 +95,7 @@ int main(int argc, char **argv)
 	noecho();
 	keypad(stdscr, 1);
 	getmaxyx(stdscr, maxy, maxx);
-	if (maxx<18||maxy<20) { endwin(); return 1; }
+	if (maxx<19||maxy<21) { endwin(); return 1; }
 restart:
 	x = y = 0;
 	selected = qtyOpened;
@@ -128,7 +130,7 @@ restart:
 		{
 			if (checkWin(board)) 
 			{
-				mvprintw(19,0, "Congratulations!\nPress r to restart");
+				mvprintw(20,0, "Congratulations!\nPress r to restart");
 				if (getch()=='r') goto restart;
 				else break;
 			}
