@@ -1,0 +1,7 @@
+# Cudoku by groman1
+Requires ncurses headers for compilation (ncurses.h)\
+Install with **make && sudo make install**\
+Usage:
+- By default, there are 16 revealed numbers
+- You can set revealed numbers, as high as 64, by entering the number as a second argument, for example: **cudoku 30** (30 revealed numbers)
+The revealed numbers are marked with white and you can't change them
