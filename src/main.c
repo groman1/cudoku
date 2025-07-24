@@ -36,7 +36,7 @@ int checkWin(char board[9][9])
 		{
 			checkhorizontal ^= 1<<(board[i][x]-50);
 			checkvertical ^= 1<<(board[x][i]-50);
-			checkcell ^= 1<<(board[i/3+x%3][x/3+(i/3)*3]-50);
+			checkcell ^= 1<<(board[(i/3)*3+x/3][x%3+(i%3)*3]-50);
 		}
 		if (checkhorizontal!=0xFF||checkvertical!=0xFF||checkcell!=0xFF) return 0;
 	}
@@ -58,7 +58,7 @@ void generateBoard(char board[9][9], char uneditable[9][9], int qtyOpened)
 
 		for (int x = 0; x<9; ++x)
 		{
-			if (board[x][position%9]-48==checkvalue||board[position/9][x]-48==checkvalue||board[position/3+x/3][x%3+(position/3*3)]-48==checkvalue) 
+			if (board[x][position%9]-48==checkvalue||board[position/9][x]-48==checkvalue||board[position/27*3+x/3][x%3+(position%9/3)*3]-48==checkvalue) 
 			{	checkvalue = 0; break;	}
 		}
 		if (checkvalue) 
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 			qtyOpened*=10;
 			qtyOpened+=argv[1][i]-48;
 		}
-		if (qtyOpened>64) 
+		if (qtyOpened>60) // the game will usually freeze without it
 		{ return 1; }
 	}
 	else qtyOpened = 16;
@@ -118,7 +118,7 @@ restart:
 			case 258:
 			{ if (y<8) { ++y; } break; }
 			case 263: case '0':
-			{ if (uneditable[y][x]==0) { board[y][x] = 32; printBoard(board, uneditable); } break; }
+			{ if (uneditable[y][x]==0&&board[y][x]!=32) { --selected; board[y][x] = 32; printBoard(board, uneditable); } break; }
 			case 'r': case 'R':
 			{ x = y = 0; goto restart; }
 			default: break;
