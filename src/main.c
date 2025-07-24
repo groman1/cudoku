@@ -25,18 +25,20 @@ void fillEmpty(char board[9][9], char character)
 	}
 }
 
+// This function XOR's 1 into an 8 bit integer for each number from 2 to 9, if there are 8 numbers are there only one time then the ninth one is there too
+
 int checkWin(char board[9][9])
 {
-	for (int i = 0; i<9; ++i)
+	unsigned char checkhorizontal = 0, checkvertical = 0, checkcell = 0;
+	for (int i = 0; i<9; ++i, checkhorizontal = 0, checkvertical = 0, checkcell = 0)
 	{
 		for (int x = 0; x<9; ++x)
 		{
-			for (int z = 0; z<9; ++z)
-			{
-				if (x==z) continue;
-				if (board[i][x]==board[i][z]||board[x][i]==board[z][i]) return 0;
-			}
+			checkhorizontal ^= 1<<(board[i][x]-50);
+			checkvertical ^= 1<<(board[x][i]-50);
+			checkcell ^= 1<<(board[i/3+x%3][x/3+(i/3)*3]-50);
 		}
+		if (checkhorizontal!=0xFF||checkvertical!=0xFF||checkcell!=0xFF) return 0;
 	}
 	return 1;
 }
@@ -56,7 +58,7 @@ void generateBoard(char board[9][9], char uneditable[9][9], int qtyOpened)
 
 		for (int x = 0; x<9; ++x)
 		{
-			if (board[x][position%9]-48==checkvalue||board[position/9][x]-48==checkvalue) 
+			if (board[x][position%9]-48==checkvalue||board[position/9][x]-48==checkvalue||board[position/3+x/3][x%3+(position/3*3)]-48==checkvalue) 
 			{	checkvalue = 0; break;	}
 		}
 		if (checkvalue) 
@@ -115,7 +117,7 @@ restart:
 			{ if (y) { --y; } break; }
 			case 258:
 			{ if (y<8) { ++y; } break; }
-			case 263:
+			case 263: case '0':
 			{ if (uneditable[y][x]==0) { board[y][x] = 32; printBoard(board, uneditable); } break; }
 			case 'r': case 'R':
 			{ x = y = 0; goto restart; }
