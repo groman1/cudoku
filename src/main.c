@@ -1,5 +1,5 @@
-#include <ncurses.h>
 #include <time.h>
+#include "rawtui.h"
 
 void printBoard(char board[9][9], char uneditable[9][9])
 {
@@ -7,12 +7,12 @@ void printBoard(char board[9][9], char uneditable[9][9])
 	{
 		for (int x = 0; x<9; ++x)
 		{
-			if (uneditable[y][x]) attron(A_REVERSE);
-			mvprintw(y<<1, x<<1, "%c", board[y][x]);
-			if (uneditable[y][x]) attroff(A_REVERSE);
-			if (x%3==2) printw("|");
+			if (uneditable[y][x]) wrattr(REVERSE);
+			moveprintsize(y<<1, x<<1, &board[y][x], 1);
+			if (uneditable[y][x]) wrattr(NORMAL);
+			if (x%3==2) print("|");
 		}
-		if (y%3==2) mvprintw((y<<1)+1, 0, "-----+-----+-----+");
+		if (y%3==2) moveprint((y<<1)+1, 0, "-----+-----+-----+");
 	}
 }
 
@@ -77,7 +77,7 @@ void generateBoard(char board[9][9], char uneditable[9][9], int qtyOpened)
 int main(int argc, char **argv)
 {
 	char board[9][9], uneditable[9][9];
-	int maxx, maxy, ch, x, y, qtyOpened = 0, selected;
+	uint16_t maxx, maxy, ch, x, y, qtyOpened = 0, selected;
 	
 	if (argc==2)
 	{
@@ -91,11 +91,9 @@ int main(int argc, char **argv)
 	}
 	else qtyOpened = 16;
 
-	initscr();
-	noecho();
-	keypad(stdscr, 1);
-	getmaxyx(stdscr, maxy, maxx);
-	if (maxx<19||maxy<21) { endwin(); return 1; }
+	init();
+	getTermXY(&maxy, &maxx);
+	if (maxx<19||maxy<21) { deinit(); return 1; }
 restart:
 	x = y = 0;
 	selected = qtyOpened;
@@ -105,21 +103,21 @@ restart:
 	printBoard(board, uneditable);
 	move(0,0);
 	
-	while((ch=getch())!='q')
+	while((ch=inesc())!='q')
 	{
 		switch (ch)
 		{
 			case '1'...'9': 
 			{ if (uneditable[y][x]==0) { if (board[y][x]==32) { ++selected; } board[y][x] = ch; printBoard(board, uneditable); } break; }
-			case 260: 
+			case 191: 
 			{ if (x) { --x; } break; }
-			case 261:
+			case 190:
 			{ if (x<8) { ++x; } break; }
-			case 259:
+			case 188:
 			{ if (y) { --y; } break; }
-			case 258:
+			case 189:
 			{ if (y<8) { ++y; } break; }
-			case 263: case '0':
+			case 127: case '0':
 			{ if (uneditable[y][x]==0&&board[y][x]!=32) { --selected; board[y][x] = 32; printBoard(board, uneditable); } break; }
 			case 'r': case 'R':
 			{ x = y = 0; goto restart; }
@@ -130,12 +128,12 @@ restart:
 		{
 			if (checkWin(board)) 
 			{
-				mvprintw(20,0, "Congratulations!\nPress r to restart");
-				if (getch()=='r') goto restart;
+				moveprint(20,0, "Congratulations!\nPress r to restart");
+				if (inesc()=='r') goto restart;
 				else break;
 			}
 		}
 	}
-	endwin();
+	deinit();
 	return 0;
 }
